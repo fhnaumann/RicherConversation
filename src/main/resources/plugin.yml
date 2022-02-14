@@ -1,0 +1,4 @@
+name: BetterConversation
+version: ${project.version}
+main: me.wand555.github.io.betterconversation.BetterConversation
+api-version: 1.18
