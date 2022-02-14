@@ -5,11 +5,8 @@ import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedEvent;
 import org.bukkit.conversations.ConversationCanceller;
 import org.bukkit.conversations.ConversationContext;
-import org.bukkit.conversations.ConversationFactory;
-import org.bukkit.conversations.ManuallyAbandonedConversationCanceller;
+import org.bukkit.conversations.ConversationPrefix;
 import org.bukkit.conversations.Prompt;
-import org.bukkit.craftbukkit.v1_18_R1.conversations.ConversationTracker;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayDeque;
@@ -17,12 +14,35 @@ import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * The Conversation class is responsible for tracking the current state of a
+ * conversation, displaying prompts to the user, and dispatching the user's
+ * response to the appropriate place. Conversation objects are not typically
+ * instantiated directly. Instead a {@link RicherConversationFactory} is used to
+ * construct identical conversations on demand.
+ * <p>
+ * Conversation flow consists of a directed graph of {@link Prompt} objects.
+ * Each time a prompt gets input from the user, it must return the next prompt
+ * in the graph. Since each Prompt chooses the next Prompt, complex
+ * conversation trees can be implemented where the nature of the player's
+ * response directs the flow of the conversation.
+ * <p>
+ * Each conversation has a {@link ConversationPrefix} that prepends all output
+ * from the conversation to the player. The ConversationPrefix can be used to
+ * display the plugin name or conversation status as the conversation evolves.
+ * <p>
+ * Each conversation has a timeout measured in the number of inactive seconds
+ * to wait before abandoning the conversation. If the inactivity timeout is
+ * reached, the conversation is abandoned and the user's incoming and outgoing
+ * chat is returned to normal.
+ * <p>
+ * You should not construct a conversation manually. Instead, use the {@link
+ * RicherConversationFactory} for access to all available options.
+ */
 public class RicherConversation extends Conversation {
 
     //store again because it has private access
@@ -37,24 +57,18 @@ public class RicherConversation extends Conversation {
 
     private Deque<PromptAndAnswer> history = new ArrayDeque<>();
 
-    public RicherConversation(
-            Plugin plugin,
-            Conversable forWhom,
-            Prompt firstPrompt,
-            Set<String> goBackSequences,
-            String cantGoBackSequence,
-            Set<String> historySequences,
-            BiFunction<PromptAndAnswer, ConversationContext, String> historyFormatting,
-            Map<String, TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt>> customKeywords) {
-        super(plugin, forWhom, firstPrompt);
-        this.firstPrompt = firstPrompt;
-        this.goBackSequences = goBackSequences;
-        this.historySequences = historySequences;
-        this.cantGoBackSequence = cantGoBackSequence;
-        this.historyFormatting = historyFormatting;
-        this.customKeywords = customKeywords;
-    }
-
+    /**
+     * Initializes a new, richer Conversation.
+     * @param plugin The plugin that owns this conversation.
+     * @param forWhom The entity for whom this conversation is mediating.
+     * @param firstPrompt The first prompt in the conversation graph
+     * @param initialSessionData Any initial values to put in the conversation context sessionData map.
+     * @param goBackSequences keywords which all cause to move back to the previous step in the graph.
+     * @param cantGoBackSequence message to display if the user tries to go back while being at the beginning.
+     * @param historySequences keywords which all cause the previous questions and answers to be displayed.
+     * @param historyFormatting formatting to apply for history.
+     * @param customKeywords any additional keywords with a custom action following.
+     */
     public RicherConversation(
             Plugin plugin,
             Conversable forWhom,
@@ -74,6 +88,11 @@ public class RicherConversation extends Conversation {
         this.customKeywords = customKeywords;
     }
 
+    /**
+     * Passes player input into the current prompt. The next prompt (as determined by the current prompt) is then displayed to the user.
+     * If a keyword is typed the appropriate action will take place instead.
+     * @param input The user's chat text.
+     */
     @Override
     public void acceptInput(String input) {
         if (currentPrompt != null) {
