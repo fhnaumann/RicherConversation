@@ -51,6 +51,40 @@
                     <outputDirectory>D:\Minecraft 1.18.1\plugins</outputDirectory>
                 </configuration>
             </plugin>
+            <plugin>
+                <!-- The Surefire Plugin is used during the test phase of the build lifecycle to execute the unit tests of an application. It generates XML reports in target/surefire-reports -->
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+            <plugin>
+                <!-- The Failsafe plugin is designed to run integration tests while the Surefire Plugin is designed to run unit tests -->
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+            <plugin>
+                <!-- The Site plugin generates a site for the project which includes the project's reports configured below -->
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.9.1</version>
+            </plugin>
+            <plugin>
+                <!-- The Maven Project Info Reports plugin reports information about the project for the site -->
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.1.1</version>
+            </plugin>
+            <plugin>
+                <!-- The JaCoCo plugin runs JaCoCo to compute coverage of the test cases -->
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.6</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- Prepares a property pointing to the JaCoCo runtime agent that can be passed as a VM argument to the application under test -->
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <resources>
             <resource>
@@ -59,6 +93,71 @@
             </resource>
         </resources>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <!-- The JXR Plugin produces a cross-reference of the project's sources, which is handy when used with the PMD Plugin for referencing errors found in the code. -->
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>3.0.0</version>
+            </plugin>
+            <plugin>
+                <!-- The Surefire Report Plugin parses the generated XML files under target/surefire-reports and renders them using DOXIA, which creates the web interface version of the test results. -->
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+            <plugin>
+                <!-- The PMD plugin runs the PMD code analysis tool on your project's source code and generate a site report with its results. It also supports the separate Copy/Paste Detector tool (or CPD) distributed with PMD. -->
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.14.0</version>
+                <configuration>
+                    <!-- Run PMD and CPD on the tests, too -->
+                    <includeTests>true</includeTests>
+                    <rulesets>
+                        <!-- We are using a custom PMD rule set -->
+                        <ruleset>https://raw.githubusercontent.com/wand555/RicherConversation/main/rules.xml</ruleset>
+                    </rulesets>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- The Javadoc plugin uses the Javadoc tool to generate javadocs for the project -->
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <additionalOptions>
+                        <option>--show-module-contents all</option>
+                        <option>--show-packages all</option>
+                    </additionalOptions>
+                </configuration>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>javadoc</report>
+                            <report>test-javadoc</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <plugin>
+                <!-- The JaCoCo plugin runs JaCoCo to compute coverage of the test cases -->
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <!-- Disable the JaCoCo Aggregate report by explicitly selecting only the simple report -->
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+                <configuration>
+                    <excludes>
+                        <exclude>me.wand555.github.io.betterconversation.BetterConversation</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <repositories>
         <repository>
@@ -76,6 +175,20 @@
             <artifactId>spigot</artifactId>
             <version>1.18.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <!-- JUnit 5 API - see https://junit.org/junit5/docs/current/user-guide/ -->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.7.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <!-- JUnit 5 Engine - see https://junit.org/junit5/docs/current/user-guide/ -->
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.7.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

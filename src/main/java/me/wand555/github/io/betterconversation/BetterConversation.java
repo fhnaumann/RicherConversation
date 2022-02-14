@@ -13,7 +13,7 @@ public final class BetterConversation extends JavaPlugin {
     public void onEnable() {
         Bukkit.getScheduler().runTaskLater(this, () -> {
             new RicherConversationFactory(this)
-                    .withGoBack("45")
+                    .withGoBack("back")
                     .withShowHistory("history", (promptAndAnswer, context) -> "test" + promptAndAnswer.prompt().getPromptText(context))
                     .withCustomKeyword("test", (context, history, prompt) -> {
                         context.getForWhom().sendRawMessage("mittels custom keyword");

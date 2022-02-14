@@ -164,5 +164,9 @@ public class RicherConversation extends Conversation {
                 .collect(Collectors.toList());
     }
 
+    public Prompt getCurrentPrompt() {
+        return currentPrompt;
+    }
+
 
 }
