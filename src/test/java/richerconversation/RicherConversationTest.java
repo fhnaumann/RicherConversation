@@ -1,10 +1,8 @@
 package richerconversation;
 
-import me.wand555.github.io.betterconversation.AgePrompt;
 import me.wand555.github.io.betterconversation.util.PromptAndAnswer;
 import me.wand555.github.io.betterconversation.RicherConversation;
 import me.wand555.github.io.betterconversation.RicherConversationFactory;
-import me.wand555.github.io.betterconversation.TestStartPrompt;
 import me.wand555.github.io.betterconversation.util.TriConsumer;
 import org.bukkit.conversations.BooleanPrompt;
 import org.bukkit.conversations.Conversable;
@@ -128,53 +126,6 @@ public class RicherConversationTest {
         @Override
         public String getPromptText(ConversationContext context) {
             return null;
-        }
-    }
-
-    private class FakeConversable implements Conversable {
-
-        public String lastSentMessage;
-        public Prompt currentPrompt;
-
-        @Override
-        public boolean isConversing() {
-            return false;
-        }
-
-        @Override
-        public void acceptConversationInput(String input) {
-
-        }
-
-        @Override
-        public boolean beginConversation(Conversation conversation) {
-            conversation.outputNextPrompt();
-            return true;
-        }
-
-        @Override
-        public void abandonConversation(Conversation conversation) {
-
-        }
-
-        @Override
-        public void abandonConversation(Conversation conversation, ConversationAbandonedEvent details) {
-
-        }
-
-        @Override
-        public void sendRawMessage(String message) {
-            //ignore null explicitly when testing to cantGoBackMessage, because that's what each test prompt returns as a question
-            //and the order is:
-            //"null" is printed (FirstPrompt) -> "back" input -> "Can't go back!" is printed -> "null" is printed (FirstPrompt again)
-            if(message != null && !message.equals("null")) {
-                lastSentMessage = message;
-            }
-        }
-
-        @Override
-        public void sendRawMessage(UUID sender, String message) {
-            sendRawMessage(message);
         }
     }
 }

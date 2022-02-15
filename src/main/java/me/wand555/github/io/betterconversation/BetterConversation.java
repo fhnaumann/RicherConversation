@@ -18,7 +18,7 @@ public final class BetterConversation extends JavaPlugin {
                     .withCustomKeyword("test", (context, history, prompt) -> {
                         context.getForWhom().sendRawMessage("mittels custom keyword");
                     })
-                    .withFirstPrompt(new TestStartPrompt())
+                    .withFirstPrompt(null)
                     .buildConversation(Bukkit.getPlayer("wand555")).begin();
         }, 2L);
     }
