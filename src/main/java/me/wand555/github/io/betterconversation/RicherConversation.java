@@ -1,5 +1,7 @@
 package me.wand555.github.io.betterconversation;
 
+import me.wand555.github.io.betterconversation.util.PromptAndAnswer;
+import me.wand555.github.io.betterconversation.util.TriConsumer;
 import org.bukkit.conversations.Conversable;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedEvent;
@@ -88,6 +90,18 @@ public class RicherConversation extends Conversation {
         this.customKeywords = customKeywords;
     }
 
+    @Override
+    public void abandon() {
+        super.abandon();
+        history.clear();
+    }
+
+    @Override
+    public synchronized void abandon(ConversationAbandonedEvent details) {
+        super.abandon(details);
+        history.clear();
+    }
+
     /**
      * Passes player input into the current prompt. The next prompt (as determined by the current prompt) is then displayed to the user.
      * If a keyword is typed the appropriate action will take place instead.
@@ -115,21 +129,7 @@ public class RicherConversation extends Conversation {
                 return;
             }
             else if(customKeywords.containsKey(input)) {
-                customKeywords.get(input).accept(context, history, currentPrompt);
-                //might have modified the history deque
-                if(!history.isEmpty()) {
-                    System.out.println("history not empty");
-                    currentPrompt = history.getFirst().prompt();
-                    //edge case: clear last remaining element, if current prompt is actually the prompt from the beginning
-                    if(currentPrompt == firstPrompt) {
-                        history.clear();
-                    }
-                }
-                //removed all elements, start at the beginning again
-                else {
-                    currentPrompt = firstPrompt;
-                }
-                System.out.println(currentPrompt);
+                customKeywords.get(input).accept(context, new ArrayDeque<>(history), currentPrompt);
                 //name is misleading, because we're showing (possibly) the same prompt
                 outputNextPrompt();
                 return;
@@ -145,12 +145,7 @@ public class RicherConversation extends Conversation {
 
     private void goBack() {
         if(!history.isEmpty()) {
-            currentPrompt = null;
             currentPrompt = history.pop().prompt();
-            System.out.println("prompt: " + currentPrompt.getPromptText(context) + "blocks? " + currentPrompt.blocksForInput(context));
-            while(!currentPrompt.blocksForInput(context)) {
-                currentPrompt = history.pop().prompt();
-            }
         }
         else {
             context.getForWhom().sendRawMessage(prefix.getPrefix(context) + cantGoBackSequence);

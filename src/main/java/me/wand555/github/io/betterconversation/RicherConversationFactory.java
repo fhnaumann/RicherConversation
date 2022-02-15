@@ -1,6 +1,8 @@
 package me.wand555.github.io.betterconversation;
 
 import com.google.common.collect.ImmutableSet;
+import me.wand555.github.io.betterconversation.util.PromptAndAnswer;
+import me.wand555.github.io.betterconversation.util.TriConsumer;
 import org.bukkit.conversations.Conversable;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedListener;
@@ -14,17 +16,11 @@ import org.bukkit.plugin.Plugin;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A ConversationFactory is responsible for creating a {@link RicherConversation} from a predefined template.
@@ -172,8 +168,7 @@ public class RicherConversationFactory extends ConversationFactory {
      * The action consumer provides the {@link ConversationContext}, the entire history and the current prompt that is displayed
      * while the keyword was typed.
      * <p></p>
-     * The history stack is mutable, meaning that you may modify the history from here. However, it is not advised to use keywords
-     * for graph logic. Use the regular chaining by returning a new prompt the end of {@link Prompt#acceptInput(ConversationContext, String)}.
+     * The history stack is a copy of the underlying history. Any changes to this copy are NOT reflected in the actual history.
      * <p></p>
      * An important note for the history: The current prompt is not present in the history stack. So for example by removing the top
      * element from the stack you actually remove the previous prompt from the history, not the currently displayed one.

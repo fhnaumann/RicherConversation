@@ -17,8 +17,6 @@ public final class BetterConversation extends JavaPlugin {
                     .withShowHistory("history", (promptAndAnswer, context) -> "test" + promptAndAnswer.prompt().getPromptText(context))
                     .withCustomKeyword("test", (context, history, prompt) -> {
                         context.getForWhom().sendRawMessage("mittels custom keyword");
-                        PromptAndAnswer popped = history.pop();
-                        System.out.println("popped " + popped.prompt().getPromptText(context) + " from history");
                     })
                     .withFirstPrompt(new TestStartPrompt())
                     .buildConversation(Bukkit.getPlayer("wand555")).begin();
