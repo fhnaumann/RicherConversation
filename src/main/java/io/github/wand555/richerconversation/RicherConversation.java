@@ -1,11 +1,10 @@
-package me.wand555.github.io.betterconversation;
+package io.github.wand555.richerconversation;
 
-import me.wand555.github.io.betterconversation.prompts.RicherPrompt;
-import me.wand555.github.io.betterconversation.util.PromptAndAnswer;
-import me.wand555.github.io.betterconversation.util.TriConsumer;
+import io.github.wand555.richerconversation.prompts.RicherPrompt;
+import io.github.wand555.richerconversation.util.PromptAndAnswer;
+import io.github.wand555.richerconversation.util.TriConsumer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.conversations.Conversable;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedEvent;

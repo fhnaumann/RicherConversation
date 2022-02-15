@@ -1,20 +1,16 @@
 package richerconversation;
 
-import me.wand555.github.io.betterconversation.util.PromptAndAnswer;
-import me.wand555.github.io.betterconversation.RicherConversation;
-import me.wand555.github.io.betterconversation.RicherConversationFactory;
-import me.wand555.github.io.betterconversation.util.TriConsumer;
+import io.github.wand555.richerconversation.util.PromptAndAnswer;
+import io.github.wand555.richerconversation.RicherConversation;
+import io.github.wand555.richerconversation.RicherConversationFactory;
+import io.github.wand555.richerconversation.util.TriConsumer;
 import org.bukkit.conversations.BooleanPrompt;
-import org.bukkit.conversations.Conversable;
-import org.bukkit.conversations.Conversation;
-import org.bukkit.conversations.ConversationAbandonedEvent;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Deque;
-import java.util.UUID;
 import java.util.function.BiFunction;
 
 import static org.junit.jupiter.api.Assertions.*;

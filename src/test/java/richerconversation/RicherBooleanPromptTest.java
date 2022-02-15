@@ -1,11 +1,10 @@
 package richerconversation;
 
-import me.wand555.github.io.betterconversation.prompts.RicherBooleanPrompt;
+import io.github.wand555.richerconversation.prompts.RicherBooleanPrompt;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.conversations.Prompt;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

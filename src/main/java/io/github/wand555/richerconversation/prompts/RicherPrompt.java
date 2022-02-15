@@ -1,4 +1,4 @@
-package me.wand555.github.io.betterconversation.prompts;
+package io.github.wand555.richerconversation.prompts;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.conversations.ConversationContext;

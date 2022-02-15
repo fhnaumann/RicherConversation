@@ -1,8 +1,8 @@
-package me.wand555.github.io.betterconversation;
+package io.github.wand555.richerconversation;
 
 import com.google.common.collect.ImmutableSet;
-import me.wand555.github.io.betterconversation.util.PromptAndAnswer;
-import me.wand555.github.io.betterconversation.util.TriConsumer;
+import io.github.wand555.richerconversation.util.PromptAndAnswer;
+import io.github.wand555.richerconversation.util.TriConsumer;
 import org.bukkit.conversations.Conversable;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedListener;

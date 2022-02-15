@@ -170,7 +170,7 @@
                 </reportSets>
                 <configuration>
                     <excludes>
-                        <exclude>me.wand555.github.io.betterconversation.BetterConversation</exclude>
+                        <exclude>io.github.wand555.richerconversation.BetterConversation</exclude>
                     </excludes>
                 </configuration>
             </plugin>

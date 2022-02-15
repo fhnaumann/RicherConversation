@@ -1,25 +1,16 @@
-package me.wand555.github.io.betterconversation;
+package io.github.wand555.richerconversation;
 
-import me.wand555.github.io.betterconversation.prompts.TestPrompt;
+import io.github.wand555.richerconversation.prompts.TestPrompt;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.Bukkit;
-import org.bukkit.conversations.Conversation;
-import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.TabCompleteEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import java.lang.reflect.Method;
-import java.util.function.BiConsumer;
 
 public final class BetterConversation extends JavaPlugin implements Listener {
 

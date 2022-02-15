@@ -1,4 +1,4 @@
-package me.wand555.github.io.betterconversation.prompts;
+package io.github.wand555.richerconversation.prompts;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.BooleanUtils;

@@ -1,4 +1,4 @@
-package me.wand555.github.io.betterconversation.util;
+package io.github.wand555.richerconversation.util;
 
 import java.util.Objects;
 
