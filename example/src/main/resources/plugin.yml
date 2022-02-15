@@ -1,0 +1,6 @@
+  name: ExamplePlugin
+  main: io.github.wand555.richerconversationexample.ExamplePlugin
+  version: 0.0.1
+  commands:
+    showbasecomponentsupport:
+      description: Shows an example prompt using base components.
