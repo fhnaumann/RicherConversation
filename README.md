@@ -1,7 +1,5 @@
 # Richer Conversation
 
----
-
 ### A concise library to improve the(old) [Conversation API](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/conversations/package-summary.html) in [Spigot](https://www.spigotmc.org/).
 
 ---

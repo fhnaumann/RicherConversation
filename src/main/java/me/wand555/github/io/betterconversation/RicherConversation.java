@@ -121,6 +121,7 @@ public class RicherConversation extends Conversation {
                 context.getForWhom().sendRawMessage(prefix.getPrefix(context) + currentPrompt.getPromptText(context));
             }
             if (!currentPrompt.blocksForInput(context)) {
+                history.push(new PromptAndAnswer(currentPrompt, null));
                 currentPrompt = currentPrompt.acceptInput(context, null);
                 outputNextPrompt();
             }
@@ -168,9 +169,18 @@ public class RicherConversation extends Conversation {
         }
     }
 
+    /**
+     * Going back is only possible on prompts that require user input.
+     * Non-input prompts are skipped when going back.
+     * Impl detail: If there are only non-input prompts in the history, going back means going to the first prompt of the conversation.
+     */
     private void goBack() {
         if(!history.isEmpty()) {
             currentPrompt = history.pop().prompt();
+            //keep going back until we find a prompt that requires input from the user or we reach the start of the conversation
+            while(!currentPrompt.blocksForInput(context) && !history.isEmpty()) {
+                currentPrompt = history.pop().prompt();
+            }
         }
         else {
             context.getForWhom().sendRawMessage(prefix.getPrefix(context) + cantGoBackSequence);
