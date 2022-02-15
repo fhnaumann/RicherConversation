@@ -1,7 +1,11 @@
 package me.wand555.github.io.betterconversation;
 
+import me.wand555.github.io.betterconversation.prompts.RicherPrompt;
 import me.wand555.github.io.betterconversation.util.PromptAndAnswer;
 import me.wand555.github.io.betterconversation.util.TriConsumer;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.conversations.Conversable;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedEvent;
@@ -9,6 +13,7 @@ import org.bukkit.conversations.ConversationCanceller;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.ConversationPrefix;
 import org.bukkit.conversations.Prompt;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayDeque;
@@ -100,6 +105,26 @@ public class RicherConversation extends Conversation {
     public synchronized void abandon(ConversationAbandonedEvent details) {
         super.abandon(details);
         history.clear();
+    }
+
+    @Override
+    public void outputNextPrompt() {
+        if (currentPrompt == null) {
+            abandon(new ConversationAbandonedEvent(this));
+        } else {
+            if(context.getForWhom() instanceof Player player && currentPrompt instanceof RicherPrompt richerPrompt) {
+                BaseComponent[] message = new ComponentBuilder(prefix.getPrefix(context))
+                        .append(richerPrompt.getRicherPromptText(context)).create();
+                player.spigot().sendMessage(message);
+            }
+            else {
+                context.getForWhom().sendRawMessage(prefix.getPrefix(context) + currentPrompt.getPromptText(context));
+            }
+            if (!currentPrompt.blocksForInput(context)) {
+                currentPrompt = currentPrompt.acceptInput(context, null);
+                outputNextPrompt();
+            }
+        }
     }
 
     /**
