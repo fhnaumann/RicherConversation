@@ -6,7 +6,7 @@
 
     <groupId>io.github.wand555</groupId>
     <artifactId>richerconversation-parent</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <packaging>pom</packaging>
     <modules>
         <module>api</module>
@@ -25,7 +25,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.depoly.skip>true</maven.depoly.skip>
+        <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
     <scm>
@@ -33,6 +33,17 @@
         <developerConnection>scm:git:git@github.com:wand555/RicherConversation.git</developerConnection>
         <url>https://github.com/wand555/RicherConversation</url>
     </scm>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
 
     <pluginRepositories>
@@ -50,9 +61,73 @@
         </license>
     </licenses>
 
+    <developers>
+        <developer>
+            <name>wand555</name>
+            <email>wand516@gmail.com</email>
+            <url>https://github.com/wand555</url>
+        </developer>
+    </developers>
+
     <build>
         <defaultGoal>clean package</defaultGoal>
         <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <source>17</source>
+                    <additionalOptions>-Xdoclint:none</additionalOptions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -77,14 +152,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <outputDirectory>D:\Minecraft 1.18.1\plugins</outputDirectory>
-                </configuration>
             </plugin>
             <plugin>
                 <!-- The Surefire Plugin is used during the test phase of the build lifecycle to execute the unit tests of an application. It generates XML reports in target/surefire-reports -->
@@ -131,12 +198,6 @@
                 </executions>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>api/src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
     </build>
 
     <reporting>
@@ -197,9 +258,6 @@
                     </reportSet>
                 </reportSets>
                 <configuration>
-                    <excludes>
-                        <exclude>io.github.wand555.richerconversation.BetterConversation</exclude>
-                    </excludes>
                 </configuration>
             </plugin>
         </plugins>
