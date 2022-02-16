@@ -4,6 +4,7 @@ import io.github.wand555.richerconversation.RicherConversation;
 import io.github.wand555.richerconversation.RicherConversationFactory;
 import io.github.wand555.richerconversationexample.prompts.BaseComponentPrompt;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

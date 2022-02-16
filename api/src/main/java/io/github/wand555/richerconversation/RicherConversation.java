@@ -5,6 +5,7 @@ import io.github.wand555.richerconversation.util.PromptAndAnswer;
 import io.github.wand555.richerconversation.util.TriConsumer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.conversations.Conversable;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedEvent;
@@ -56,9 +57,9 @@ public class RicherConversation extends Conversation {
 
     private Map<String, Supplier<? extends Prompt>> keywords;
     private Set<String> goBackSequences;
-    private String cantGoBackSequence;
+    private BaseComponent cantGoBackSequence;
     private Set<String> historySequences;
-    private BiFunction<PromptAndAnswer, ConversationContext, String> historyFormatting;
+    private BaseComponentFormatter historyFormatting;
     private Map<String, TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt>> customKeywords;
 
     private Deque<PromptAndAnswer> history = new ArrayDeque<>();
@@ -81,9 +82,9 @@ public class RicherConversation extends Conversation {
             Prompt firstPrompt,
             Map<Object, Object> initialSessionData,
             Set<String> goBackSequences,
-            String cantGoBackSequence,
+            BaseComponent cantGoBackSequence,
             Set<String> historySequences,
-            BiFunction<PromptAndAnswer, ConversationContext, String> historyFormatting,
+            BaseComponentFormatter historyFormatting,
             Map<String, TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt>> customKeywords) {
         super(plugin, forWhom, firstPrompt, initialSessionData);
         this.firstPrompt = firstPrompt;
@@ -111,10 +112,10 @@ public class RicherConversation extends Conversation {
         if (currentPrompt == null) {
             abandon(new ConversationAbandonedEvent(this));
         } else {
-            if(context.getForWhom() instanceof Player player && currentPrompt instanceof RicherPrompt richerPrompt) {
+            if(currentPrompt instanceof RicherPrompt richerPrompt) {
                 BaseComponent[] message = new ComponentBuilder(prefix.getPrefix(context))
                         .append(richerPrompt.getRicherPromptText(context)).create();
-                player.spigot().sendMessage(message);
+                sendMessage(message);
             }
             else {
                 context.getForWhom().sendRawMessage(prefix.getPrefix(context) + currentPrompt.getPromptText(context));
@@ -150,7 +151,7 @@ public class RicherConversation extends Conversation {
                 goBack();
             }
             else if(historySequences.contains(input)) {
-                formatToReadableHistory().forEach(context.getForWhom()::sendRawMessage);
+                formatToReadableHistory().forEach(this::sendMessage);
                 return;
             }
             else if(customKeywords.containsKey(input)) {
@@ -182,15 +183,30 @@ public class RicherConversation extends Conversation {
             }
         }
         else {
-            context.getForWhom().sendRawMessage(prefix.getPrefix(context) + cantGoBackSequence);
+            sendMessage(new ComponentBuilder(prefix.getPrefix(context))
+                    .append(cantGoBackSequence)
+                    .create());
         }
 
     }
 
-    private List<String> formatToReadableHistory() {
+    private List<BaseComponent> formatToReadableHistory() {
         return history.stream()
                 .map(promptAndAnswer -> historyFormatting.apply(promptAndAnswer, context))
                 .collect(Collectors.toList());
+    }
+
+    private void sendMessage(BaseComponent baseComponent) {
+        if(context.getForWhom() instanceof Player player) {
+            player.spigot().sendMessage(baseComponent);
+        }
+        else {
+            context.getForWhom().sendRawMessage(baseComponent.toPlainText());
+        }
+    }
+
+    private void sendMessage(BaseComponent[] baseComponents) {
+        sendMessage(new TextComponent(baseComponents));
     }
 
     public Prompt getCurrentPrompt() {

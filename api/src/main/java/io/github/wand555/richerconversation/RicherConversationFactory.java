@@ -3,6 +3,8 @@ package io.github.wand555.richerconversation;
 import com.google.common.collect.ImmutableSet;
 import io.github.wand555.richerconversation.util.PromptAndAnswer;
 import io.github.wand555.richerconversation.util.TriConsumer;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.conversations.Conversable;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedListener;
@@ -18,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -31,10 +34,10 @@ import java.util.function.BiFunction;
  */
 public class RicherConversationFactory extends ConversationFactory {
 
-    private String cantGoBackMessage = "Cannot go back further!";
-    private Set<String> goBackSequences;
-    private Set<String> showHistorySequences;
-    private BiFunction<PromptAndAnswer, ConversationContext, String> historyFormatting = (promptAndAnswer, context) -> "Q: " + promptAndAnswer.prompt().getPromptText(context) + " A: " + promptAndAnswer.answer();
+    private BaseComponent cantGoBackMessage = new TextComponent("Cannot go back further!");
+    private final Set<String> goBackSequences = new HashSet<>();
+    private final Set<String> showHistorySequences = new HashSet<>();
+    private BaseComponentFormatter historyFormatting = (promptAndAnswer, context) -> new TextComponent("Q: " + promptAndAnswer.prompt().getPromptText(context) + " A: " + promptAndAnswer.answer());
     private Map<String, TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt>> customKeywords = new HashMap<>();
 
     /**
@@ -46,17 +49,13 @@ public class RicherConversationFactory extends ConversationFactory {
         super(plugin);
     }
 
-
     /**
      * Sets the player input that, when received, will cause the conversation flow to move to the previous step.
      * @param goBackSequence Input to trigger the effect.
      * @return This object.
-     * @see #withGoBack(String, String)
-     * @see #withGoBack(Set)
-     * @see #withGoBack(Set, String)
      */
     public RicherConversationFactory withGoBack(String goBackSequence) {
-        return withGoBack(Set.of(goBackSequence));
+        return withGoBack(goBackSequence, cantGoBackMessage);
     }
 
     /**
@@ -64,40 +63,19 @@ public class RicherConversationFactory extends ConversationFactory {
      * @param goBackSequence Input to trigger the effect.
      * @param cantGoBackMessage Message to be displayed if the beginning of the conversation is reached and therefore cannot go back any further.
      * @return This object.
-     * @see #withGoBack(String)
-     * @see #withGoBack(Set)
-     * @see #withGoBack(Set, String)
      */
     public RicherConversationFactory withGoBack(String goBackSequence, String cantGoBackMessage) {
-        return withGoBack(Set.of(goBackSequence), cantGoBackMessage);
+        return withGoBack(goBackSequence, new TextComponent(cantGoBackMessage));
     }
 
     /**
      * Sets the player input that, when received, will cause the conversation flow to move to the previous step.
-     * @param goBackSequences Set of inputs to trigger the effect.
-     * @return This object.
-     * @see #withGoBack(String)
-     * @see #withGoBack(String, String)
-     * @see #withGoBack(Set, String)
-     */
-    public RicherConversationFactory withGoBack(Set<String> goBackSequences) {
-        return withGoBack(goBackSequences, cantGoBackMessage);
-    }
-
-    /**
-     * Sets the player input that, when received, will cause the conversation flow to move to the previous step.
-     * @param goBackSequences Set of inputs to trigger the effect.
+     * @param goBackSequence Input to trigger the effect.
      * @param cantGoBackMessage Message to be displayed if the beginning of the conversation is reached and therefore cannot go back any further.
      * @return This object.
-     * @see #withGoBack(String)
-     * @see #withGoBack(String, String)
-     * @see #withGoBack(Set)
-     * @see #withGoBack(Set, String)
      */
-    public RicherConversationFactory withGoBack(Set<String> goBackSequences, String cantGoBackMessage) {
-        if(goBackSequences != null) {
-            this.goBackSequences = ImmutableSet.copyOf(goBackSequences);
-        }
+    public RicherConversationFactory withGoBack(String goBackSequence, BaseComponent cantGoBackMessage) {
+        goBackSequences.add(goBackSequence);
         this.cantGoBackMessage = cantGoBackMessage;
         return this;
     }
@@ -107,12 +85,9 @@ public class RicherConversationFactory extends ConversationFactory {
      * Typing this keyword won't have any effect on the current prompt. It behaves like no answer was given.
      * @param showHistorySequence Input to trigger the effect.
      * @return This object.
-     * @see #withShowHistory(String, BiFunction)
-     * @see #withShowHistory(Set)
-     * @see #withShowHistory(Set, BiFunction)
      */
     public RicherConversationFactory withShowHistory(String showHistorySequence) {
-        return withShowHistory(Set.of(showHistorySequence));
+        return withShowHistory(showHistorySequence, historyFormatting);
     }
 
     /**
@@ -121,44 +96,20 @@ public class RicherConversationFactory extends ConversationFactory {
      * @param showHistorySequence Input to trigger the effect.
      * @param formatting Function to format each line in the history with.
      * @return This object.
-     * @see #withShowHistory(String)
-     * @see #withShowHistory(String, BiFunction)
-     * @see #withShowHistory(Set)
-     * @see #withShowHistory(Set, BiFunction)
      */
-    public RicherConversationFactory withShowHistory(String showHistorySequence, BiFunction<PromptAndAnswer, ConversationContext, String> formatting) {
-        return withShowHistory(Set.of(showHistorySequence), formatting);
+    public RicherConversationFactory withShowHistory(String showHistorySequence, StringFormatter formatting) {
+        return withShowHistory(showHistorySequence, (BaseComponentFormatter) (promptAndAnswer, context) -> new TextComponent(formatting.apply(promptAndAnswer, context)));
     }
 
     /**
      * Sets the player input that, when received, will display the entire previous history.
      * Typing this keyword won't have any effect on the current prompt. It behaves like no answer was given.
-     * @param showHistorySequences Set of inputs to trigger the effect.
-     * @return This object.
-     * @see #withShowHistory(String)
-     * @see #withShowHistory(String, BiFunction)
-     * @see #withShowHistory(Set)
-     * @see #withShowHistory(Set, BiFunction)
-     */
-    public RicherConversationFactory withShowHistory(Set<String> showHistorySequences) {
-        return withShowHistory(showHistorySequences, historyFormatting);
-    }
-
-    /**
-     * Sets the player input that, when received, will display the entire previous history.
-     * Typing this keyword won't have any effect on the current prompt. It behaves like no answer was given.
-     * @param showHistorySequences Set of inputs to trigger the effect.
+     * @param showHistorySequence Input to trigger the effect.
      * @param formatting Function to format each line in the history with.
      * @return This object.
-     * @see #withShowHistory(String)
-     * @see #withShowHistory(String, BiFunction)
-     * @see #withShowHistory(Set)
-     * @see #withShowHistory(Set, BiFunction)
      */
-    public RicherConversationFactory withShowHistory(Set<String> showHistorySequences, BiFunction<PromptAndAnswer, ConversationContext, String> formatting) {
-        if(showHistorySequences != null) {
-            this.showHistorySequences = ImmutableSet.copyOf(showHistorySequences);
-        }
+    public RicherConversationFactory withShowHistory(String showHistorySequence, BaseComponentFormatter formatting) {
+        showHistorySequences.add(showHistorySequence);
         this.historyFormatting = formatting;
         return this;
     }
@@ -204,7 +155,7 @@ public class RicherConversationFactory extends ConversationFactory {
         }
 
         //Clone any initial session data
-        Map<Object, Object> copiedInitialSessionData = new HashMap<Object, Object>();
+        Map<Object, Object> copiedInitialSessionData = new HashMap<>();
         copiedInitialSessionData.putAll(initialSessionData);
 
         //Build and return a conversation

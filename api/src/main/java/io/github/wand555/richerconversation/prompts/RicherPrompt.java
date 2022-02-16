@@ -48,7 +48,7 @@ public interface RicherPrompt extends Prompt {
      * Only if the {@link org.bukkit.conversations.Conversable} involved in this conversation is an instance of {@link org.bukkit.command.ConsoleCommandSender},
      * will the result of this method be used.
      * @param context Context information about the conversation.
-     * @return What {@link RicherMessagePrompt#getRicherPromptText(ConversationContext)} returns formatted to plain text.
+     * @return What {@link RicherPrompt#getRicherPromptText(ConversationContext)} returns formatted to plain text.
      * @see #getRicherPromptText(ConversationContext)
      */
     @Override

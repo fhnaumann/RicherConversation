@@ -1,5 +1,6 @@
 package richerconversation;
 
+import io.github.wand555.richerconversation.StringFormatter;
 import io.github.wand555.richerconversation.util.PromptAndAnswer;
 import io.github.wand555.richerconversation.RicherConversation;
 import io.github.wand555.richerconversation.RicherConversationFactory;
@@ -23,7 +24,7 @@ public class RicherConversationTest {
     private String goBackKeyword = "back";
     private String cantGoBackMessage = "Can't go back!";
     private String historyKeyword = "history";
-    private BiFunction<PromptAndAnswer, ConversationContext, String> historyFormatting = (promptAndAnswer, context) -> "Q: " + promptAndAnswer.prompt().getPromptText(context) + " A: " + promptAndAnswer.answer();
+    private StringFormatter historyFormatting = (promptAndAnswer, context) -> "Q: " + promptAndAnswer.prompt().getPromptText(context) + " A: " + promptAndAnswer.answer();
     private String customKeyword1 = "test1";
     private String actionMessage1 = "from action!";
     private TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt> customAction1 = (context, history, prompt) -> context.getForWhom().sendRawMessage(actionMessage1);
