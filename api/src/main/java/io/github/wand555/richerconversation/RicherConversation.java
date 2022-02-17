@@ -15,6 +15,8 @@ import org.bukkit.conversations.ConversationPrefix;
 import org.bukkit.conversations.Prompt;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -55,14 +57,24 @@ public class RicherConversation extends Conversation {
     //store again because it has private access
     private Prompt firstPrompt;
 
-    private Map<String, Supplier<? extends Prompt>> keywords;
     private Set<String> goBackSequences;
     private BaseComponent cantGoBackSequence;
     private Set<String> historySequences;
     private BaseComponentFormatter historyFormatting;
     private Map<String, TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt>> customKeywords;
 
-    private Deque<PromptAndAnswer> history = new ArrayDeque<>();
+    private final Deque<PromptAndAnswer> history = new ArrayDeque<>();
+
+    /**
+     * Initializes a new Conversation.
+     *
+     * @param plugin The plugin that owns this conversation.
+     * @param forWhom The entity for whom this conversation is mediating.
+     * @param firstPrompt The first prompt in the conversation graph.
+     */
+    public RicherConversation(@Nullable Plugin plugin, @NotNull Conversable forWhom, @Nullable Prompt firstPrompt) {
+        super(plugin, forWhom, firstPrompt);
+    }
 
     /**
      * Initializes a new, richer Conversation.
@@ -95,6 +107,8 @@ public class RicherConversation extends Conversation {
         this.customKeywords = customKeywords;
     }
 
+
+
     @Override
     public void abandon() {
         super.abandon();
@@ -113,13 +127,13 @@ public class RicherConversation extends Conversation {
             abandon(new ConversationAbandonedEvent(this));
         } else {
             if(currentPrompt instanceof RicherPrompt richerPrompt) {
-                BaseComponent[] message = new ComponentBuilder(prefix.getPrefix(context))
-                        .append(richerPrompt.getRicherPromptText(context)).create();
-                sendMessage(message);
+                sendMessage(richerPrompt.getRicherPromptText(context));
             }
             else {
-                context.getForWhom().sendRawMessage(prefix.getPrefix(context) + currentPrompt.getPromptText(context));
+                sendMessage(currentPrompt.getPromptText(context));
             }
+            //only add non-blocking prompts to history, because prompts which require input may also be used
+            //to type keywords where in that case the prompt is not added to the history
             if (!currentPrompt.blocksForInput(context)) {
                 history.push(new PromptAndAnswer(currentPrompt, null));
                 currentPrompt = currentPrompt.acceptInput(context, null);
@@ -138,7 +152,7 @@ public class RicherConversation extends Conversation {
         if (currentPrompt != null) {
             // Echo the user's input
             if (localEchoEnabled) {
-                context.getForWhom().sendRawMessage(prefix.getPrefix(context) + input);
+                sendMessage(input);
             }
             // Test for conversation abandonment based on input
             for (ConversationCanceller canceller : cancellers) {
@@ -177,7 +191,7 @@ public class RicherConversation extends Conversation {
     private void goBack() {
         if(!history.isEmpty()) {
             currentPrompt = history.pop().prompt();
-            //keep going back until we find a prompt that requires input from the user or we reach the start of the conversation
+            //keep going back until we find a prompt that requires input from the user, or we reach the start of the conversation
             while(!currentPrompt.blocksForInput(context) && !history.isEmpty()) {
                 currentPrompt = history.pop().prompt();
             }
@@ -197,16 +211,30 @@ public class RicherConversation extends Conversation {
     }
 
     private void sendMessage(BaseComponent baseComponent) {
+        TextComponent toSend = new TextComponent(getPrefixMessage(), baseComponent);
         if(context.getForWhom() instanceof Player player) {
-            player.spigot().sendMessage(baseComponent);
+            player.spigot().sendMessage(toSend);
         }
         else {
-            context.getForWhom().sendRawMessage(baseComponent.toPlainText());
+            context.getForWhom().sendRawMessage(toSend.toPlainText());
         }
     }
 
     private void sendMessage(BaseComponent[] baseComponents) {
         sendMessage(new TextComponent(baseComponents));
+    }
+
+    private void sendMessage(String message) {
+        sendMessage(new TextComponent(message));
+    }
+
+    private BaseComponent getPrefixMessage() {
+        if(getPrefix() instanceof RicherPrefix richerPrefix) {
+            return richerPrefix.getRicherPrefix(context);
+        }
+        else {
+            return new TextComponent(getPrefix().getPrefix(context));
+        }
     }
 
     public Prompt getCurrentPrompt() {
