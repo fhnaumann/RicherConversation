@@ -24,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,7 @@ public class RicherConversation extends Conversation {
     private Map<String, MessageAndAction> goBackSequences;
     private Set<String> historySequences;
     private BaseComponentFormatter historyFormatting;
+    private boolean skipNonBlocking;
     private Map<String, TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt>> customKeywords;
 
     private final Deque<PromptAndAnswer> history = new ArrayDeque<>();
@@ -87,7 +90,6 @@ public class RicherConversation extends Conversation {
      * @param firstPrompt The first prompt in the conversation graph
      * @param initialSessionData Any initial values to put in the conversation context sessionData map.
      * @param goBackSequences keywords which all cause to move back to the previous step in the graph.
-     * @param cantGoBackSequence message to display if the user tries to go back while being at the beginning.
      * @param historySequences keywords which all cause the previous questions and answers to be displayed.
      * @param historyFormatting formatting to apply for history.
      * @param customKeywords any additional keywords with a custom action following.
@@ -98,15 +100,16 @@ public class RicherConversation extends Conversation {
             Prompt firstPrompt,
             Map<Object, Object> initialSessionData,
             Map<String, MessageAndAction> goBackSequences,
-            BaseComponent cantGoBackSequence,
             Set<String> historySequences,
             BaseComponentFormatter historyFormatting,
+            boolean skipNonBlocking,
             Map<String, TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt>> customKeywords) {
         super(plugin, forWhom, firstPrompt, initialSessionData);
         this.firstPrompt = firstPrompt;
         this.goBackSequences = goBackSequences;
         this.historySequences = historySequences;
         this.historyFormatting = historyFormatting;
+        this.skipNonBlocking = skipNonBlocking;
         this.customKeywords = customKeywords;
     }
 
@@ -138,8 +141,9 @@ public class RicherConversation extends Conversation {
             //only add non-blocking prompts to history, because prompts which require input may also be used
             //to type keywords where in that case the prompt is not added to the history
             if (!currentPrompt.blocksForInput(context)) {
-                history.push(new PromptAndAnswer(currentPrompt, null));
-                System.out.println("added to history from outputnextprompt" + currentPrompt.getPromptText(context));
+                if(!skipNonBlocking) {
+                    history.push(new PromptAndAnswer(currentPrompt, null));
+                }
                 currentPrompt = currentPrompt.acceptInput(context, null);
                 outputNextPrompt();
             }
@@ -233,9 +237,11 @@ public class RicherConversation extends Conversation {
     }
 
     private List<BaseComponent> formatToReadableHistory() {
-        return history.stream()
-                .map(promptAndAnswer -> historyFormatting.apply(promptAndAnswer, context))
-                .collect(Collectors.toList());
+        List<BaseComponent> readableHistory = new ArrayList<>();
+        history.descendingIterator().forEachRemaining(promptAndAnswer -> {
+            readableHistory.add(historyFormatting.apply(promptAndAnswer, context));
+        });
+        return readableHistory;
     }
 
     private void sendMessage(BaseComponent baseComponent) {

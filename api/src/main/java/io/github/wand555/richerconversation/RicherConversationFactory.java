@@ -58,10 +58,10 @@ public class RicherConversationFactory {
     /*
      * Additional fields
      */
-    private BaseComponent cantGoBackMessage;
     private final Map<String, MessageAndAction> goBackSequences;
     private final Set<String> showHistorySequences;
     private BaseComponentFormatter historyFormatting;
+    private boolean skipNonBlocking;
     private final Map<String, TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt>> customKeywords;
 
     /**
@@ -80,7 +80,6 @@ public class RicherConversationFactory {
         this.cancellers = new ArrayList<>();
         this.abandonedListeners = new ArrayList<>();
 
-        this.cantGoBackMessage = new TextComponent("Cannot go back further!");
         this.goBackSequences = new HashMap<>();
         this.showHistorySequences = new HashSet<>();
         this.historyFormatting = (promptAndAnswer, context) -> new TextComponent("Q: " + promptAndAnswer.prompt().getPromptText(context) + " A: " + promptAndAnswer.answer());
@@ -309,8 +308,22 @@ public class RicherConversationFactory {
      * @return This object.
      */
     public RicherConversationFactory withShowHistory(String showHistorySequence, BaseComponentFormatter formatting) {
+        withShowHistory(showHistorySequence, formatting, false);
+        return this;
+    }
+
+    /**
+     * Sets the player input that, when received, will display the entire previous history.
+     * Typing this keyword won't have any effect on the current prompt. It behaves like no answer was given.
+     * @param showHistorySequence Input to trigger the effect.
+     * @param formatting Function to format each line in the history with.
+     * @param skipNonBlocking Whether to count non-blocking prompts (e.g. everything that implements {@link org.bukkit.conversations.MessagePrompt} to the history or not.
+     * @return This object.
+     */
+    public RicherConversationFactory withShowHistory(String showHistorySequence, BaseComponentFormatter formatting, boolean skipNonBlocking) {
         showHistorySequences.add(showHistorySequence);
         this.historyFormatting = formatting;
+        this.skipNonBlocking = skipNonBlocking;
         return this;
     }
 
@@ -372,9 +385,9 @@ public class RicherConversationFactory {
                 firstPrompt,
                 copiedInitialSessionData,
                 goBackSequences,
-                cantGoBackMessage,
                 showHistorySequences,
                 historyFormatting,
+                skipNonBlocking,
                 customKeywords);
 
         //use reflection because the methods are made private (for no apparent reason, why would the variables be protected then?)
