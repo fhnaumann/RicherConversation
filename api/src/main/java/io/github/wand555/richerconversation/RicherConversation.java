@@ -1,11 +1,13 @@
 package io.github.wand555.richerconversation;
 
 import io.github.wand555.richerconversation.prompts.RicherPrompt;
+import io.github.wand555.richerconversation.util.MessageAndAction;
 import io.github.wand555.richerconversation.util.PromptAndAnswer;
 import io.github.wand555.richerconversation.util.TriConsumer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.conversations.BooleanPrompt;
 import org.bukkit.conversations.Conversable;
 import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationAbandonedEvent;
@@ -13,11 +15,14 @@ import org.bukkit.conversations.ConversationCanceller;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.ConversationPrefix;
 import org.bukkit.conversations.Prompt;
+import org.bukkit.conversations.ValidatingPrompt;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.List;
@@ -57,8 +62,7 @@ public class RicherConversation extends Conversation {
     //store again because it has private access
     private Prompt firstPrompt;
 
-    private Set<String> goBackSequences;
-    private BaseComponent cantGoBackSequence;
+    private Map<String, MessageAndAction> goBackSequences;
     private Set<String> historySequences;
     private BaseComponentFormatter historyFormatting;
     private Map<String, TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt>> customKeywords;
@@ -93,7 +97,7 @@ public class RicherConversation extends Conversation {
             Conversable forWhom,
             Prompt firstPrompt,
             Map<Object, Object> initialSessionData,
-            Set<String> goBackSequences,
+            Map<String, MessageAndAction> goBackSequences,
             BaseComponent cantGoBackSequence,
             Set<String> historySequences,
             BaseComponentFormatter historyFormatting,
@@ -102,7 +106,6 @@ public class RicherConversation extends Conversation {
         this.firstPrompt = firstPrompt;
         this.goBackSequences = goBackSequences;
         this.historySequences = historySequences;
-        this.cantGoBackSequence = cantGoBackSequence;
         this.historyFormatting = historyFormatting;
         this.customKeywords = customKeywords;
     }
@@ -136,6 +139,7 @@ public class RicherConversation extends Conversation {
             //to type keywords where in that case the prompt is not added to the history
             if (!currentPrompt.blocksForInput(context)) {
                 history.push(new PromptAndAnswer(currentPrompt, null));
+                System.out.println("added to history from outputnextprompt" + currentPrompt.getPromptText(context));
                 currentPrompt = currentPrompt.acceptInput(context, null);
                 outputNextPrompt();
             }
@@ -151,7 +155,7 @@ public class RicherConversation extends Conversation {
     public void acceptInput(String input) {
         if (currentPrompt != null) {
             // Echo the user's input
-            if (localEchoEnabled) {
+            if (localEchoEnabled && !isKeyword(input)) {
                 sendMessage(input);
             }
             // Test for conversation abandonment based on input
@@ -161,11 +165,14 @@ public class RicherConversation extends Conversation {
                     return;
                 }
             }
-            if(goBackSequences.contains(input)) {
-                goBack();
+            if(goBackSequences.containsKey(input)) {
+                goBack(goBackSequences.get(input));
+                outputNextPrompt();
+                return;
             }
             else if(historySequences.contains(input)) {
                 formatToReadableHistory().forEach(this::sendMessage);
+                outputNextPrompt();
                 return;
             }
             else if(customKeywords.containsKey(input)) {
@@ -175,7 +182,9 @@ public class RicherConversation extends Conversation {
                 return;
             }
             else {
-                history.push(new PromptAndAnswer(currentPrompt, input));
+                if(isValid(input)) {
+                    history.push(new PromptAndAnswer(currentPrompt, input));
+                }
             }
             // Not abandoned, output the next prompt
             currentPrompt = currentPrompt.acceptInput(context, input);
@@ -188,8 +197,9 @@ public class RicherConversation extends Conversation {
      * Non-input prompts are skipped when going back.
      * Impl detail: If there are only non-input prompts in the history, going back means going to the first prompt of the conversation.
      */
-    private void goBack() {
+    private void goBack(MessageAndAction messageAndAction) {
         if(!history.isEmpty()) {
+            messageAndAction.action().accept(context, history, currentPrompt);
             currentPrompt = history.pop().prompt();
             //keep going back until we find a prompt that requires input from the user, or we reach the start of the conversation
             while(!currentPrompt.blocksForInput(context) && !history.isEmpty()) {
@@ -197,11 +207,29 @@ public class RicherConversation extends Conversation {
             }
         }
         else {
-            sendMessage(new ComponentBuilder(prefix.getPrefix(context))
-                    .append(cantGoBackSequence)
-                    .create());
+            sendMessage(messageAndAction.message());
         }
 
+    }
+
+    private boolean isKeyword(String input) {
+        return goBackSequences.containsKey(input) || historySequences.contains(input) || customKeywords.containsKey(input);
+    }
+
+    private boolean isValid(String input) {
+        if(!(currentPrompt instanceof ValidatingPrompt)) {
+            return true;
+        }
+        ValidatingPrompt validatingPrompt = (ValidatingPrompt) currentPrompt;
+        //use reflection because isInputValid hase package access only.
+        try {
+            Method validMethod = ValidatingPrompt.class.getDeclaredMethod("isInputValid", ConversationContext.class, String.class);
+            validMethod.setAccessible(true);
+            return (boolean) validMethod.invoke(validatingPrompt, context, input);
+        } catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+
+        }
+        return false;
     }
 
     private List<BaseComponent> formatToReadableHistory() {

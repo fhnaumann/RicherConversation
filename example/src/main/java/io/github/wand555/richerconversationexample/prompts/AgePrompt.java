@@ -6,22 +6,20 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.conversations.ConversationContext;
-import org.bukkit.conversations.MessagePrompt;
+import org.bukkit.conversations.NumericPrompt;
 import org.bukkit.conversations.Prompt;
-import org.bukkit.conversations.StringPrompt;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class NamePrompt extends StringPrompt implements RicherPrompt {
+public class AgePrompt extends NumericPrompt implements RicherPrompt {
+    @Nullable
+    @Override
+    protected Prompt acceptValidatedInput(@NotNull ConversationContext context, @NotNull Number input) {
+        return new DayPrompt();
+    }
 
     @Override
     public BaseComponent getRicherPromptText(ConversationContext context) {
-        return new TextComponent(new ComponentBuilder("What's your name?").color(ExamplePlugin.QUESTION_COLOR).create());
-    }
-
-    @Nullable
-    @Override
-    public Prompt acceptInput(@NotNull ConversationContext context, @Nullable String input) {
-        return new AgePrompt();
+        return new TextComponent(new ComponentBuilder("Alright. And how old are you?").color(ExamplePlugin.QUESTION_COLOR).create());
     }
 }

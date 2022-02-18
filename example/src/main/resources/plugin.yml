@@ -4,3 +4,7 @@
   commands:
     showbasecomponentsupport:
       description: Shows an example prompt using base components.
+    showgoback:
+      description: Shows an example how to work with the go-back keyword.
+    showhistory:
+      description: Shows an example how to work with the history keyword.

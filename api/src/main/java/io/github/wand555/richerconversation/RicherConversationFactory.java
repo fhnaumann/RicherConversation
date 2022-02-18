@@ -1,6 +1,7 @@
 package io.github.wand555.richerconversation;
 
 import io.github.wand555.richerconversation.prompts.RicherPrompt;
+import io.github.wand555.richerconversation.util.MessageAndAction;
 import io.github.wand555.richerconversation.util.PromptAndAnswer;
 import io.github.wand555.richerconversation.util.TriConsumer;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -58,7 +59,7 @@ public class RicherConversationFactory {
      * Additional fields
      */
     private BaseComponent cantGoBackMessage;
-    private final Set<String> goBackSequences;
+    private final Map<String, MessageAndAction> goBackSequences;
     private final Set<String> showHistorySequences;
     private BaseComponentFormatter historyFormatting;
     private final Map<String, TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt>> customKeywords;
@@ -80,7 +81,7 @@ public class RicherConversationFactory {
         this.abandonedListeners = new ArrayList<>();
 
         this.cantGoBackMessage = new TextComponent("Cannot go back further!");
-        this.goBackSequences = new HashSet<>();
+        this.goBackSequences = new HashMap<>();
         this.showHistorySequences = new HashSet<>();
         this.historyFormatting = (promptAndAnswer, context) -> new TextComponent("Q: " + promptAndAnswer.prompt().getPromptText(context) + " A: " + promptAndAnswer.answer());
         this.customKeywords = new HashMap<>();
@@ -243,7 +244,7 @@ public class RicherConversationFactory {
      * @return This object.
      */
     public RicherConversationFactory withGoBack(String goBackSequence) {
-        return withGoBack(goBackSequence, cantGoBackMessage);
+        return withGoBack(goBackSequence, "Can't go back!");
     }
 
     /**
@@ -263,8 +264,19 @@ public class RicherConversationFactory {
      * @return This object.
      */
     public RicherConversationFactory withGoBack(String goBackSequence, BaseComponent cantGoBackMessage) {
-        goBackSequences.add(goBackSequence);
-        this.cantGoBackMessage = cantGoBackMessage;
+        withGoBack(goBackSequence, cantGoBackMessage, (context, promptAndAnswers, prompt) -> {});
+        return this;
+    }
+
+    /**
+     * Sets the player input that, when received, will cause the conversation flow to move to the previous step.
+     * @param goBackSequence Input to trigger the effect.
+     * @param cantGoBackMessage Message to be displayed if the beginning of the conversation is reached and therefore cannot go back any further.
+     * @param action Action to be performed when the user types the keyword.
+     * @return This object.
+     */
+    public RicherConversationFactory withGoBack(String goBackSequence, BaseComponent cantGoBackMessage, TriConsumer<ConversationContext, Deque<PromptAndAnswer>, Prompt> action) {
+        goBackSequences.put(goBackSequence, new MessageAndAction(cantGoBackMessage, action));
         return this;
     }
 
@@ -352,6 +364,7 @@ public class RicherConversationFactory {
 
         //Clone any initial session data
         Map<Object, Object> copiedInitialSessionData = new HashMap<>(initialSessionData);
+
         //Build and return a conversation
         RicherConversation richerConversation = new RicherConversation(
                 plugin,
