@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.wand555</groupId>
         <artifactId>richerconversation-parent</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
     </parent>
 
     <artifactId>richerconversation-example</artifactId>
@@ -58,7 +58,8 @@
                 <version>1.6.8</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+                    <!-- Should actually be set to true, but due to a nexus staging bug, one cannot skip a submodule only. -->
+                    <skipNexusStagingDeployMojo>false</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
             <!--
