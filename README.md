@@ -1,6 +1,6 @@
 # Richer Conversation
 
-### A concise library to improve the(old) [Conversation API](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/conversations/package-summary.html) in [Spigot](https://www.spigotmc.org/).
+### A concise library to improve the (old) [Conversation API](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/conversations/package-summary.html) in [Spigot](https://www.spigotmc.org/).
 
 ---
 
@@ -9,7 +9,7 @@ Depending on the project with maven:
 <dependency>
   <groupId>io.github.wand555</groupId>
   <artifactId>richerconversation-api</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 </dependency>
 ```
 
