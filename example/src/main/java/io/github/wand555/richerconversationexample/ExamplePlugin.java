@@ -1,6 +1,7 @@
 package io.github.wand555.richerconversationexample;
 
 
+import io.github.wand555.richerconversation.BaseComponentFormatter;
 import io.github.wand555.richerconversation.RicherConversation;
 import io.github.wand555.richerconversation.RicherConversationFactory;
 import io.github.wand555.richerconversation.RicherPrefix;
@@ -8,6 +9,7 @@ import io.github.wand555.richerconversation.prompts.RicherBooleanPrompt;
 import io.github.wand555.richerconversation.prompts.RicherPrompt;
 import io.github.wand555.richerconversation.prompts.RicherShortPrompt;
 import io.github.wand555.richerconversation.prompts.ShortPrompt;
+import io.github.wand555.richerconversation.util.PromptAndAnswer;
 import io.github.wand555.richerconversation.util.QuestionAndPrompt;
 import io.github.wand555.richerconversationexample.prompts.BaseComponentPrompt;
 import io.github.wand555.richerconversationexample.prompts.NamePrompt;
@@ -22,6 +24,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.conversations.ConversationContext;
+import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.conversations.ConversationPrefix;
 import org.bukkit.conversations.MessagePrompt;
 import org.bukkit.conversations.Prompt;
@@ -91,7 +94,31 @@ public class ExamplePlugin extends JavaPlugin implements CommandExecutor {
                     .buildConversation(player);
             conversation.begin();
         }
-
+        else if(command.getName().equals("showhistory")) {
+            RicherConversation conversation = new RicherConversationFactory(this)
+                    //define a prefix using BaseComponents
+                    .withPrefix(context -> new TextComponent(new ComponentBuilder()
+                            .append("[")
+                            .color(SECONDARY_MAIN_COLOR)
+                            .append("ExamplePlugin")
+                            .color(MAIN_COLOR)
+                            .append("] ")
+                            .color(SECONDARY_MAIN_COLOR)
+                            .create()))
+                    //define a history keyword and skip non-blocking prompts
+                    .withShowHistory("history", (promptAndAnswer, context) -> new TextComponent(new ComponentBuilder()
+                            .append("Question: " + promptAndAnswer.prompt().getPromptText(context))
+                            .color(QUESTION_COLOR)
+                            .append(" Your answer: " + promptAndAnswer.answer())
+                            .color(SECONDARY_MAIN_COLOR)
+                            .create()),
+                            true)
+                    //define first prompt
+                    .withFirstPrompt(new NamePrompt())
+                    //building conversation
+                    .buildConversation(player);
+            conversation.begin();
+        }
 
         return true;
     }
