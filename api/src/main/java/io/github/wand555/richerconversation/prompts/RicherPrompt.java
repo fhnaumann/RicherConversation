@@ -12,18 +12,19 @@ import org.bukkit.conversations.Prompt;
  * </p>
  * <p>
  *     An example would be
- *     <br>
+ *     <pre>
  *     {@code
- *      public class MyCustomMessagePrompt extends MessagePrompt implements RicherPrompt {
- *          @Override
- *          public TextComponent getRicherPromptText(ConversationContext context) {
- *              return new TextComponent(new ComponentBuilder("Wow, I'm ")
- *                  .append("clickable")
- *                  .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "look at me"))
- *                  .create());
- *          }
- *      }
- *     }
+ *     public class MyCustomMessagePrompt extends MessagePrompt implements RicherPrompt {
+ *         @Override
+ *         public TextComponent getRicherPromptText(ConversationContext context) {
+ *             return new TextComponent(new ComponentBuilder("Wow, I'm ")
+ *                 .append("clickable")
+ *                 .event(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "look at me"))
+ *                 .create());
+ *        }
+ *    }
+ * }
+ *     </pre>
  * </p>
  * <p>
  *     Overriding {@link RicherPrompt#getPromptText(ConversationContext)} has barely any effect aside from one point:
