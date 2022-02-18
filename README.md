@@ -9,7 +9,7 @@ Depending on the project with maven:
 <dependency>
   <groupId>io.github.wand555</groupId>
   <artifactId>richerconversation-api</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 </dependency>
 ```
 
