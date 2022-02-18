@@ -3,6 +3,7 @@ package io.github.wand555.richerconversationexample;
 
 import io.github.wand555.richerconversation.RicherConversation;
 import io.github.wand555.richerconversation.RicherConversationFactory;
+import io.github.wand555.richerconversation.prompts.RicherBooleanPrompt;
 import io.github.wand555.richerconversation.prompts.RicherPrompt;
 import io.github.wand555.richerconversation.prompts.RicherShortPrompt;
 import io.github.wand555.richerconversation.prompts.ShortPrompt;

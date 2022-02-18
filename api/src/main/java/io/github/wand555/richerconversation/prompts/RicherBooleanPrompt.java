@@ -7,16 +7,28 @@ import org.bukkit.conversations.Conversation;
 import org.bukkit.conversations.ConversationContext;
 import org.bukkit.conversations.Prompt;
 
+/**
+ * Allows for more options for booleans also differentiating between true and false.
+ */
 public abstract class RicherBooleanPrompt extends BooleanPrompt {
 
     private final String[] acceptTrue;
     private final String[] acceptFalse;
     private final boolean useDefaults;
 
+    /**
+     * Default constructor to use the build in checks for booleans.
+     */
     public RicherBooleanPrompt() {
         this(null, null, true);
     }
 
+    /**
+     * Constructs a prompt based on the given arrays.
+     * @param acceptTrue Array for the accepting true values.
+     * @param acceptFalse Array for the accepting false values.
+     * @param useDefaults Whether to use the default values additionally.
+     */
     public RicherBooleanPrompt(String[] acceptTrue, String[] acceptFalse, boolean useDefaults) {
         if(acceptTrue != null) {
             this.acceptTrue = acceptTrue;
