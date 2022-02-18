@@ -95,29 +95,29 @@ public class ExamplePlugin extends JavaPlugin implements CommandExecutor {
             conversation.begin();
         }
         else if(command.getName().equals("showhistory")) {
-            RicherConversation conversation = new RicherConversationFactory(this)
-                    //define a prefix using BaseComponents
-                    .withPrefix(context -> new TextComponent(new ComponentBuilder()
-                            .append("[")
-                            .color(SECONDARY_MAIN_COLOR)
-                            .append("ExamplePlugin")
-                            .color(MAIN_COLOR)
-                            .append("] ")
-                            .color(SECONDARY_MAIN_COLOR)
-                            .create()))
-                    //define a history keyword and skip non-blocking prompts
-                    .withShowHistory("history", (promptAndAnswer, context) -> new TextComponent(new ComponentBuilder()
-                            .append("Question: " + promptAndAnswer.prompt().getPromptText(context))
-                            .color(QUESTION_COLOR)
-                            .append(" Your answer: " + promptAndAnswer.answer())
-                            .color(SECONDARY_MAIN_COLOR)
-                            .create()),
-                            true)
-                    //define first prompt
-                    .withFirstPrompt(new NamePrompt())
-                    //building conversation
-                    .buildConversation(player);
-            conversation.begin();
+RicherConversation conversation = new RicherConversationFactory(this)
+        //define a prefix using BaseComponents
+        .withPrefix(context -> new TextComponent(new ComponentBuilder()
+                .append("[")
+                .color(SECONDARY_MAIN_COLOR)
+                .append("ExamplePlugin")
+                .color(MAIN_COLOR)
+                .append("] ")
+                .color(SECONDARY_MAIN_COLOR)
+                .create()))
+        //define a history keyword and skip non-blocking prompts
+        .withShowHistory("history", (promptAndAnswer, context) -> new TextComponent(new ComponentBuilder()
+                .append("Question: " + promptAndAnswer.prompt().getPromptText(context))
+                .color(QUESTION_COLOR)
+                .append(" Your answer: " + promptAndAnswer.answer())
+                .color(SECONDARY_MAIN_COLOR)
+                .create()),
+                true)
+        //define first prompt
+        .withFirstPrompt(new NamePrompt())
+        //building conversation
+        .buildConversation(player);
+conversation.begin();
         }
 
         return true;
