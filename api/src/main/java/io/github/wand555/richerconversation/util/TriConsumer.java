@@ -2,6 +2,12 @@ package io.github.wand555.richerconversation.util;
 
 import java.util.Objects;
 
+/**
+ * TriConsumer utility class.
+ * @param <A> type a.
+ * @param <B> type b.
+ * @param <C> type c.
+ */
 @FunctionalInterface
 public interface TriConsumer<A, B, C> {
 

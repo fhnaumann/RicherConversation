@@ -117,9 +117,13 @@ public class RicherConversationFactory {
     }
 
     /**
+     * Sets the {@link RicherPrefix} that prepends all output from all
+     * generated conversations.
+     * <p>
+     * The default is a {@link NullConversationPrefix};
      *
-     * @param prefix
-     * @return
+     * @param prefix The ConversationPrefix to use.
+     * @return This object.
      */
     public RicherConversationFactory withPrefix(RicherPrefix prefix) {
         this.prefix = prefix;
