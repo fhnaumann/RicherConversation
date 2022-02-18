@@ -4,6 +4,15 @@
 
 ---
 
+Depending on the project with maven:
+```
+<dependency>
+  <groupId>io.github.wand555</groupId>
+  <artifactId>richerconversation-api</artifactId>
+  <version>1.0.2</version>
+</dependency>
+```
+
 This library is designed to bring the useful, underused, but also old Conversation API up to date.
 The main features are
 - BaseComponent support for prompt questions
